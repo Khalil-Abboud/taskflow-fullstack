@@ -8,12 +8,40 @@
 </head>
 
 <body>
-    <h1>Login</h1>
-    <input id="username" placeholder="Username" />
-    <br><br>
-    <input id="password" type="password" placeholder="Password" />
-    <br><br>
-    <button id="login-btn">Login</button>
+    <div id="login-form">
+        <h1>Login</h1>
+        <input id="username" placeholder="Username" />
+        <br><br>
+        <input id="password" type="password" placeholder="Password" />
+        <br><br>
+        <button id="login-btn">Login</button>
+        <button id="register-page-btn">Register</button>
+
+    </div>
+    <div id="register-form">
+        <h1>Register</h1>
+        <input id="new-email" placeholder="Email" />
+        <br><br>
+        <input id="new-username" placeholder="Username" />
+        <br><br>
+        <input id="new-password" type="password" placeholder="Password" />
+        <br><br>
+        <button id="register-btn">Register</button>
+        <button id="close-register-btn">Back</button>
+    </div>
+    <button id="logout-btn">Logout</button>
+    <div id="task-form">
+        <h2>Tasks</h2>
+        <input id="task-title" placeholder="Task title" />
+        <textarea id="task-description" placeholder="Task description"></textarea>
+        <select id="task-priority">
+            <option value="low">Low</option>
+            <option value="medium" selected>Medium</option>
+            <option value="high">High</option>
+        </select>
+        <input id="task-due-date" type="date" />
+        <button id="add-task-btn">Add task</button>
+    </div>
     <pre id="output"></pre>
 
     <script src="script.js"></script>

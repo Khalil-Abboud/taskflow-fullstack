@@ -7,27 +7,34 @@ TaskFlow is a fullstack task management application built with:
 - PostgreSQL
 - Docker
 
-This project started as a backend-only API and was extended into a working fullstack application with a simple frontend that communicates with the API using token-based authentication.
+This project started as a backend-only API and was extended into a working fullstack application with a dynamic frontend that communicates with the API using token-based authentication.
 
 ---
 
 ## Current Features
 
 ### Authentication
-- User registration
+- User registration (from frontend and API)
 - User login
 - Token-based authentication using DRF TokenAuthentication
+- Logout (client-side with token removal)
+
+---
 
 ### Tasks (Backend API)
 - Create a task
 - List user tasks
 - Retrieve task details
-- Update a task
+- Update a task (status, fields)
 - Delete a task
+
+---
 
 ### Task Ownership
 - Each task belongs to one user
 - Users can only access their own tasks
+
+---
 
 ### Filtering, Search, and Ordering
 - Filter tasks by:
@@ -42,20 +49,61 @@ This project started as a backend-only API and was extended into a working fulls
   - `title`
   - `due_date`
 
+---
+
 ### Pagination
 - Page number pagination enabled
 - Default page size: `5`
 
 ---
 
-## Frontend Features (Current State)
+## Frontend Features (Updated)
 
-- Basic login form (username + password)
-- Sends login request to Django API
-- Receives and stores authentication token in `localStorage`
-- Automatically loads tasks if a token exists
-- Fetches tasks using the saved token
-- Displays API response inside the page
+### Authentication UI
+- Login form
+- Register form (separate UI view)
+- Switch between Login / Register
+- Logout button
+- Conditional UI rendering based on authentication state
+
+---
+
+### Token Handling
+- Token stored in `localStorage`
+- Auto-login if token exists
+- Token used automatically in API requests
+
+---
+
+### Task Management (Frontend)
+- Add new task from UI
+- Delete task
+- Toggle task status using checkbox
+- Load tasks dynamically without page reload
+- Display only current user's tasks
+
+---
+
+### Extended Task Fields (Frontend + Backend)
+Each task now supports:
+
+- Title
+- Description (textarea input)
+- Status (To Do / Done toggle)
+- Priority (Low / Medium / High via select)
+- Due date (date input)
+
+---
+
+### Task Display Improvements
+- Each task rendered as structured block (not raw text)
+- Separation between:
+  - Title
+  - Details (status, priority, due date, description)
+- Interactive elements:
+  - Checkbox for status
+  - Delete button
+- Dynamic rendering using JavaScript (DOM manipulation)
 
 ---
 
@@ -74,6 +122,7 @@ This project started as a backend-only API and was extended into a working fulls
 - Vanilla JavaScript
 - Fetch API
 - LocalStorage
+- DOM manipulation
 
 ---
 
@@ -89,10 +138,12 @@ taskflow-fullstack/
 │ ├── docker-compose.yml
 │ ├── requirements.txt
 │ └── manage.py
+│
 ├── frontend/
 │ ├── index.html
 │ ├── script.js
-│ └── style.css (optional)
+│ └── style.css (in progress)
+│
 └── README.md
 
 
@@ -108,151 +159,111 @@ taskflow-fullstack/
 
 Example:
 
-
+```json
 {
-"username": "testuser",
-"email": "user@example.com
-",
-"password": "yourpassword123"
+  "username": "testuser",
+  "email": "user@example.com",
+  "password": "yourpassword123"
 }
+Login
 
-
----
-
-#### Login
-
-`POST /api/users/login/`
+POST /api/users/login/
 
 Example:
 
-
 {
-"username": "testuser",
-"password": "yourpassword123"
+  "username": "testuser",
+  "password": "yourpassword123"
 }
-
 
 Response:
 
+{
+  "token": "your_token_here",
+  "username": "testuser",
+  "email": "user@example.com"
+}
+Tasks
+List Tasks
+
+GET /api/tasks/
+
+Create Task
+
+POST /api/tasks/
+
+Example:
 
 {
-"token": "your_token_here",
-"username": "testuser",
-"email": "user@example.com
-"
+  "title": "Finish project",
+  "description": "Write documentation",
+  "status": "todo",
+  "priority": "high",
+  "due_date": "2026-04-25"
 }
+Retrieve Task
 
+GET /api/tasks/<id>/
 
----
+Update Task
 
-### Tasks
+PUT /api/tasks/<id>/
+PATCH /api/tasks/<id>/
 
-#### List Tasks
+Delete Task
 
-`GET /api/tasks/`
+DELETE /api/tasks/<id>/
 
-#### Create Task
-
-`POST /api/tasks/`
-
-#### Retrieve Task
-
-`GET /api/tasks/<id>/`
-
-#### Update Task
-
-`PUT /api/tasks/<id>/`  
-`PATCH /api/tasks/<id>/`
-
-#### Delete Task
-
-`DELETE /api/tasks/<id>/`
-
----
-
-## Authentication Header
-
-
+Authentication Header
 Authorization: Token your_token_here
-
-
----
-
-## Running the Project
-
-### 1. Backend (Docker)
-
-
+Running the Project
+1. Backend (Docker)
 cd backend
 docker compose up --build
-
-
-### 2. Apply Migrations
-
-
+2. Apply Migrations
 docker compose exec web python manage.py migrate
-
-
-### 3. Create Superuser (optional)
-
-
+3. Create Superuser (optional)
 docker compose exec web python manage.py createsuperuser
-
-
-### 4. Frontend
-
-
+4. Frontend
 cd frontend
 py -m http.server 5500
 
-
 Open:
 
-
 http://127.0.0.1:5500
-
-
----
-
-## How It Works (Current Flow)
-
-1. User enters username and password
-2. Frontend sends login request to API
-3. API returns authentication token
-4. Token is stored in `localStorage`
-5. Frontend automatically uses token for future requests
-6. Tasks are fetched and displayed
-
----
-
-## Notes
-
-- Backend requires authentication for all task endpoints
-- Token is stored in the browser (localStorage)
-- Frontend is intentionally simple for learning purposes
-- Uses Fetch API instead of frameworks (React, etc.)
-
----
-
-## Future Improvements
-
-- Improve UI/UX (replace raw JSON with styled components)
-- Add task creation from frontend
-- Add edit/delete task functionality
-- Add logout functionality
-- Improve error handling and user feedback
-- Refactor frontend structure
-- Migrate frontend to React
-- Add API documentation (Swagger)
-- Switch to JWT authentication
-- Prepare production deployment
-
----
-
-## Status
-
-- Backend API: ✔ Complete (MVP)
-- Frontend: ✔ Basic integration working
-- Authentication flow: ✔ Working
-- Fullstack connection: ✔ Working
-- UI: ❌ Minimal (to be improved)
+How It Works (Current Flow)
+User registers or logs in from frontend
+Frontend sends request to Django API
+API returns authentication token
+Token is stored in localStorage
+UI updates based on authentication state
+Frontend automatically loads tasks
+All requests include the token in headers
+User can:
+Add tasks
+Toggle status
+Delete tasks
+Notes
+Backend requires authentication for all task endpoints
+Token is stored in the browser (localStorage)
+Frontend is built without frameworks for learning purposes
+Uses Fetch API instead of libraries (Axios, etc.)
+UI is currently functional but not styled (CSS improvements next)
+Future Improvements
+Improve UI/UX (CSS layout, task cards, spacing)
+Add task editing (title, description, priority, due date)
+Improve error handling and validation messages
+Add loading indicators and better feedback
+Refactor frontend code into reusable functions
+Introduce component-based structure
+Migrate frontend to React
+Add API documentation (Swagger / Redoc)
+Switch authentication to JWT
+Prepare production deployment
+Status
+Backend API: ✔ Complete (MVP)
+Authentication: ✔ Working (Register + Login + Token)
+Task System: ✔ Fully functional
+Frontend Logic: ✔ Dynamic and interactive
+Fullstack Integration: ✔ Working
+UI/UX: ⚠ Needs styling (next step)
