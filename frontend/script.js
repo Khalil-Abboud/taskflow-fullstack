@@ -141,13 +141,20 @@ async function loadTasks() {
                 descriptionText = task.description;
             }
             titleElement.textContent = task.title;
-            detailsElement.textContent =
-                "Status: " + statusLabel +
-                "| Priority: " + priorityLabel +
-                "| Due date: " + dueDateText +
-                "| Description: " + descriptionText;
+            if (task.status === "done") {
+                titleElement.classList.add("done");
+                taskElement.classList.add("done");
+            }
+            detailsElement.innerHTML = `
+            <p>${task.description || "No description"}</p>
+            <div class="task-meta">
+            <span class="priority-badge ${task.priority}">
+            priority: ${task.priority}</span>
+            <span>Due: ${task.due_date || "No date"}</span>
+            </div>`;
             const checkBox = document.createElement("input");
             checkBox.type = "checkbox";
+            checkBox.classList.add("task-status");
             checkBox.checked = task.status === "done";
             checkBox.addEventListener("change", async function () {
                 const token = localStorage.getItem("token");
@@ -163,7 +170,17 @@ async function loadTasks() {
                             status: newStatus
                         })
                     });
-                    loadTasks();
+                    // loadTasks();
+                    if (checkBox.checked) {
+                        titleElement.classList.add("done");
+                        taskElement.classList.add("done");
+                        // output.appendChild(taskElement);
+                    }
+                    else {
+                        titleElement.classList.remove("done");
+                        taskElement.classList.remove("done");
+                        // output.prepend(taskElement);
+                    }
                 }
                 catch (error) {
                     output.textContent = "Error updating task.";
@@ -171,6 +188,7 @@ async function loadTasks() {
                 }
             });
             const deleteButton = document.createElement("button");
+            deleteButton.classList.add("delete-btn");
             deleteButton.textContent = "Delete";
             deleteButton.addEventListener("click", async function () {
                 const token = localStorage.getItem("token");
@@ -279,7 +297,7 @@ addTaskButton.addEventListener("click", async function () {
                 due_date: dueDate || null,
             })
         });
-        const data = response.json();
+        const data = await response.json();
         if (!response.ok) {
             output.textContent = "Error creating task.";
             console.log(data);
