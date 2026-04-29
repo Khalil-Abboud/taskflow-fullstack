@@ -7,6 +7,17 @@ const output = document.getElementById("output");
 const loginForm = document.getElementById("login-form");
 const registerForm = document.getElementById("register-form");
 const tasksForm = document.getElementById("task-form");
+const modal = document.getElementById("confirm-modal");
+const confirmDeleteBtn = document.getElementById("confirm-delete");
+const cancelDeleteBtn = document.getElementById("cancel-delete");
+const paginationDiv = document.getElementById("pagination");
+
+
+modal.addEventListener("click", function (e) {
+    if (e.target === modal) {
+        modal.classList.add("hidden");
+    }
+});
 
 registerForm.style.display = "none";
 
@@ -83,11 +94,31 @@ registerButton.addEventListener("click", async function () {
 logoutButton.addEventListener("click", function () {
     localStorage.removeItem("token");
     output.textContent = "Logged out.";
+    paginationDiv.innerHTML = "";
     checkAuthUI();
 });
 
+function renderPagination(data) {
+    paginationDiv.innerHTML = "";
+    if (data.previous) {
+        const prevBtn = document.createElement("button");
+        prevBtn.textContent = "Previous";
+        prevBtn.addEventListener("click", function () {
+            loadTasks(data.previous);
+        });
+        paginationDiv.appendChild(prevBtn);
+    }
+    if (data.next) {
+        const nextBtn = document.createElement("button");
+        nextBtn.textContent = "Next";
+        nextBtn.addEventListener("click", function () {
+            loadTasks(data.next);
+        });
+        paginationDiv.appendChild(nextBtn);
+    }
+}
 
-async function loadTasks() {
+async function loadTasks(url = "http://127.0.0.1:8000/api/tasks/") {
     const token = localStorage.getItem("token");
     if (!token) {
         output.textContent = "Please log in.";
@@ -95,7 +126,7 @@ async function loadTasks() {
     }
     output.textContent = "Loading tasks...";
     try {
-        const taskResponse = await fetch("http://127.0.0.1:8000/api/tasks/", {
+        const taskResponse = await fetch(url, {
             headers: {
                 "Authorization": "Token " + token
             }
@@ -109,9 +140,16 @@ async function loadTasks() {
         const tasks = taskData.results;
         if (tasks.length === 0) {
             output.textContent = "No tasks yet.";
+            renderPagination(taskData);
             return;
         }
         output.innerHTML = "";
+        taskData.results.sort(function (a, b) {
+            if (!a.due_date && !b.due_date) { return 0; }
+            if (!a.due_date) { return 1; }
+            if (!b.due_date) { return -1; }
+            return new Date(a.due_date) - new Date(b.due_date);
+        });
         tasks.forEach(function (task) {
             const taskElement = document.createElement("div");
             taskElement.className = "task-card";
@@ -192,19 +230,24 @@ async function loadTasks() {
             deleteButton.textContent = "Delete";
             deleteButton.addEventListener("click", async function () {
                 const token = localStorage.getItem("token");
-                try {
-                    await fetch("http://127.0.0.1:8000/api/tasks/" + task.id + "/", {
-                        method: "DELETE",
-                        headers: {
-                            "Authorization": "Token " + token
-                        }
-                    });
-                    loadTasks();
-                }
-                catch (error) {
-                    output.textContent = ("Error deleting task.");
-                    console.log(error);
-                }
+                modal.classList.remove("hidden");
+                confirmDeleteBtn.onclick = async function () {
+                    try {
+                        const response = await fetch("http://127.0.0.1:8000/api/tasks/" + task.id + "/", {
+                            method: "DELETE",
+                            headers: {
+                                "Authorization": "Token " + token
+                            }
+                        });
+                        if (response.ok) { loadTasks(); }
+                        modal.classList.add("hidden");
+                    }
+                    catch (error) {
+                        output.textContent = ("Error deleting task.");
+                        console.log(error);
+                    }
+                };
+                cancelDeleteBtn.onclick = function () { modal.classList.add("hidden"); }
             });
             topRowElement.appendChild(checkBox);
             topRowElement.appendChild(titleElement);
@@ -215,7 +258,7 @@ async function loadTasks() {
 
             output.appendChild(taskElement);
         });
-
+        renderPagination(taskData);
     }
     catch (error) {
         output.textContent = "Could not load tasks.";
