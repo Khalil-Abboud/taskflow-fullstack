@@ -28,6 +28,7 @@ function checkAuthUI() {
         logoutButton.style.display = "block";
         tasksForm.style.display = "block";
         registerForm.style.display = "none";
+        loadTasks();
     }
     else {
         loginForm.style.display = "block";
@@ -45,12 +46,14 @@ registerPageButton.addEventListener("click", function () {
     registerForm.style.display = "block";
     output.textContent = "";
 });
+
 closeRegisterButton.addEventListener("click", function () {
     loginForm.style.display = "block";
     logoutButton.style.display = "none";
     registerForm.style.display = "none";
     output.textContent = "Please log in.";
 });
+
 registerButton.addEventListener("click", async function () {
     const newEmailInput = document.getElementById("new-email");
     const newUsernameInput = document.getElementById("new-username");
@@ -85,6 +88,7 @@ registerButton.addEventListener("click", async function () {
         registerForm.style.display = "none";
         output.textContent = "Registered successfully.";
     }
+
     catch (error) {
         output.textContent = "Error registering user.";
         console.log(error);
@@ -125,6 +129,7 @@ async function loadTasks(url = "http://127.0.0.1:8000/api/tasks/") {
         return;
     }
     output.textContent = "Loading tasks...";
+
     try {
         const taskResponse = await fetch(url, {
             headers: {
@@ -144,12 +149,14 @@ async function loadTasks(url = "http://127.0.0.1:8000/api/tasks/") {
             return;
         }
         output.innerHTML = "";
-        taskData.results.sort(function (a, b) {
+
+        tasks.sort(function (a, b) {
             if (!a.due_date && !b.due_date) { return 0; }
             if (!a.due_date) { return 1; }
             if (!b.due_date) { return -1; }
             return new Date(a.due_date) - new Date(b.due_date);
         });
+
         tasks.forEach(function (task) {
             const taskElement = document.createElement("div");
             taskElement.className = "task-card";
@@ -159,37 +166,32 @@ async function loadTasks(url = "http://127.0.0.1:8000/api/tasks/") {
             detailsElement.className = "task-details";
             const topRowElement = document.createElement("div");
             topRowElement.className = "task-top-row";
-            const statusMap = {
-                todo: "To Do",
-                done: "Done"
-            };
+
             const priorityMap = {
                 low: "Low",
                 medium: "Medium",
                 high: "High"
             };
-            const statusLabel = statusMap[task.status];
             const priorityLabel = priorityMap[task.priority];
-            let dueDateText = "No due date";
-            if (task.due_date) {
-                dueDateText = task.due_date;
-            }
-            let descriptionText = "No description";
-            if (task.description) {
-                descriptionText = task.description;
-            }
+
             titleElement.textContent = task.title;
+
             if (task.status === "done") {
                 titleElement.classList.add("done");
                 taskElement.classList.add("done");
             }
+
             detailsElement.innerHTML = `
             <p>${task.description || "No description"}</p>
             <div class="task-meta">
-            <span class="priority-badge ${task.priority}">
-            priority: ${task.priority}</span>
-            <span>Due: ${task.due_date || "No date"}</span>
+                <span class="priority-badge ${task.priority}">
+                    priority: ${priorityLabel}
+                </span>
+                <span>
+                    Due: ${task.due_date || "No date"}
+                </span>
             </div>`;
+
             const checkBox = document.createElement("input");
             checkBox.type = "checkbox";
             checkBox.classList.add("task-status");
@@ -208,23 +210,22 @@ async function loadTasks(url = "http://127.0.0.1:8000/api/tasks/") {
                             status: newStatus
                         })
                     });
-                    // loadTasks();
                     if (checkBox.checked) {
                         titleElement.classList.add("done");
                         taskElement.classList.add("done");
-                        // output.appendChild(taskElement);
                     }
                     else {
                         titleElement.classList.remove("done");
                         taskElement.classList.remove("done");
-                        // output.prepend(taskElement);
                     }
                 }
+
                 catch (error) {
                     output.textContent = "Error updating task.";
                     console.log(error);
                 }
             });
+
             const deleteButton = document.createElement("button");
             deleteButton.classList.add("delete-btn");
             deleteButton.textContent = "Delete";
@@ -242,6 +243,7 @@ async function loadTasks(url = "http://127.0.0.1:8000/api/tasks/") {
                         if (response.ok) { loadTasks(); }
                         modal.classList.add("hidden");
                     }
+
                     catch (error) {
                         output.textContent = ("Error deleting task.");
                         console.log(error);
@@ -249,6 +251,7 @@ async function loadTasks(url = "http://127.0.0.1:8000/api/tasks/") {
                 };
                 cancelDeleteBtn.onclick = function () { modal.classList.add("hidden"); }
             });
+
             topRowElement.appendChild(checkBox);
             topRowElement.appendChild(titleElement);
             topRowElement.appendChild(deleteButton);
@@ -260,12 +263,12 @@ async function loadTasks(url = "http://127.0.0.1:8000/api/tasks/") {
         });
         renderPagination(taskData);
     }
+
     catch (error) {
         output.textContent = "Could not load tasks.";
         console.log(error);
     }
 }
-
 
 loginButton.addEventListener("click", async function () {
     const usernameInput = document.getElementById("username");
@@ -303,8 +306,6 @@ loginButton.addEventListener("click", async function () {
         console.log(error);
     }
 });
-
-loadTasks();
 
 const addTaskButton = document.getElementById("add-task-btn");
 addTaskButton.addEventListener("click", async function () {

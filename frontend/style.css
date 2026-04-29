@@ -50,6 +50,7 @@ button {
     font: inherit;
     cursor: pointer;
     background-color: #e5e7eb;
+    transition: background-color 0.2s ease;
 }
 
 button:hover {
@@ -64,6 +65,8 @@ button:hover {
 #output {
     max-width: 700px;
     margin: 0 auto;
+    display: flex;
+    flex-direction: column;
 }
 
 .task-card {
@@ -73,6 +76,7 @@ button:hover {
     border: 1px solid #e5e7eb;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    order: 1;
 }
 
 .task-top-row {
@@ -104,6 +108,7 @@ button:hover {
 .delete-btn {
     background-color: #ef4444;
     color: white;
+    transition: background-color 0.2 ease;
 }
 
 .delete-btn:hover {
@@ -134,15 +139,6 @@ button:hover {
     background-color: #f3f4f6;
     border-radius: 999px;
     font-size: 14px;
-}
-
-#output {
-    display: flex;
-    flex-direction: column;
-}
-
-.task-card {
-    order: 1;
 }
 
 .task-card.done {
